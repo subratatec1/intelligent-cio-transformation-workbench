@@ -2,6 +2,10 @@
 
 A working prototype that connects enterprise strategy, capabilities, processes, technology, risk, investment and outcomes. It helps a CIO explore business impact and compare transformation choices with traceable evidence.
 
+## Preview
+
+![Workbench overview](preview/overview.png)
+
 ## Run in two commands
 
 Requires Node.js 22 or newer. No npm packages or API keys are required for the demonstration.
@@ -108,7 +112,7 @@ The API is local and read-only; imports and decisions remain in browser storage.
 
 ## Deployment
 
-For a static host, publish `dist/`. No build is needed. The included Sites hosting manifest belongs to this prototype's private preview; remove or replace that identity when making an independent Site. GitHub source hosting is separate from the private preview. GitHub Pages can serve `dist/` after a suitable Pages workflow is configured; that workflow is not enabled by this prototype.
+For a static host, publish `dist/`. No build is needed. GitHub source hosting is separate from the private preview. GitHub Pages can serve `dist/` after a suitable Pages workflow is configured; that workflow is not enabled by this prototype.
 
 ## Prototype boundaries and next steps
 
