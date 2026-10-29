@@ -1,0 +1,106 @@
+name: Materialize and verify prototype
+
+on:
+  push:
+    paths:
+      - prototype-source.zip
+      - .github/workflows/bootstrap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Expand the reviewed source package
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          root = Path.cwd().resolve()
+          with ZipFile('prototype-source.zip') as archive:
+              for entry in archive.infolist():
+                  relative = entry.filename.replace('\\', '/')
+                  target = (root / relative).resolve()
+                  if not target.is_relative_to(root) or relative.split('/')[0] not in {'dist', 'lib', 'scripts', 'tests'}:
+                      raise ValueError('Unexpected source package entry')
+                  if entry.is_dir():
+                      target.mkdir(parents=True, exist_ok=True)
+                  else:
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      target.write_bytes(archive.read(entry))
+          PY
+      - run: npm test
+      - name: Commit expanded application sources
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add dist lib scripts tests
+          if ! git diff --cached --quiet; then
+            git commit -m 'Materialize verified Intelligent CIO prototype sources'
+            git push
+          fi
+      - name: Install browser verification dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright
+          npx playwright install --with-deps chromium
+      - name: Verify user journeys and capture preview
+        run: |
+          node server.mjs > /tmp/cio-server.log 2>&1 &
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          import assert from 'node:assert/strict';
+          import { mkdir } from 'node:fs/promises';
+          const browser = await chromium.launch();
+          const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
+          const errors = [];
+          page.on('pageerror', error => errors.push(error.message));
+          await page.goto('http://127.0.0.1:4173');
+          await page.getByRole('heading', { name: 'Your enterprise. Connected.' }).waitFor();
+          await mkdir('preview', { recursive: true });
+          await page.screenshot({ path: 'preview/overview.png', fullPage: true });
+          await page.getByRole('button', { name: 'Enterprise graph', exact: true }).click();
+          await page.getByRole('heading', { name: 'See the enterprise connections.' }).waitFor();
+          await page.getByRole('button', { name: 'Explore PolicyCore', exact: true }).click();
+          await page.screenshot({ path: 'preview/enterprise-graph.png', fullPage: true });
+          await page.getByRole('button', { name: 'Impact analysis', exact: true }).click();
+          await page.locator('#impact-select').selectOption('tech-db');
+          assert.ok(await page.getByRole('button', { name: 'Grow digital revenue', exact: true }).count());
+          await page.getByRole('button', { name: 'Scenarios', exact: true }).click();
+          await page.locator('.preset-row').getByRole('button', { name: 'Cost first', exact: true }).click();
+          await page.getByText('Consolidate enterprise reporting: evidence requires validation.', { exact: false }).waitFor();
+          await page.getByRole('button', { name: 'Record scenario review', exact: true }).click();
+          await page.getByRole('heading', { name: 'Review cost transformation option', exact: true }).waitFor();
+          await page.getByRole('textbox').fill('Illustrative planning review; validate savings with Finance.');
+          await page.getByRole('button', { name: 'Approve for planning', exact: true }).click();
+          await page.getByText('Approved', { exact: true }).waitFor();
+          await page.reload();
+          await page.getByText('Approved', { exact: true }).waitFor();
+          await page.getByRole('button', { name: 'CIO advisor', exact: true }).click();
+          await page.locator('[data-question]').first().click();
+          await page.getByRole('heading', { name: 'Business impact of Legacy database platform', exact: true }).waitFor();
+          await page.locator('.citation').first().click();
+          await page.getByRole('dialog').waitFor();
+          await page.getByRole('button', { name: 'Close evidence panel', exact: true }).click();
+          assert.deepEqual(errors, []);
+          await page.setViewportSize({ width: 390, height: 844 });
+          await page.goto('http://127.0.0.1:4173/#overview');
+          await page.getByRole('heading', { name: 'Your enterprise. Connected.' }).waitFor();
+          assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+          await page.screenshot({ path: 'preview/mobile.png', fullPage: true });
+          await browser.close();
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prototype-preview
+          path: preview/
+          if-no-files-found: ignore
