@@ -4,7 +4,7 @@ A working prototype that connects enterprise strategy, capabilities, processes, 
 
 ## Preview
 
-![Workbench overview](preview/overview.png)
+![Twelve-module workbench](preview/twelve-modules.png)
 
 ## Run in two commands
 
@@ -112,7 +112,7 @@ The API is local and read-only; imports and decisions remain in browser storage.
 
 ## Deployment
 
-For a static host, publish `dist/`. No build is needed. GitHub source hosting is separate from the private preview. GitHub Pages can serve `dist/` after a suitable Pages workflow is configured; that workflow is not enabled by this prototype.
+For a static host, publish `dist/`. No build is needed. GitHub Pages is enabled through `.github/workflows/static.yml`. Live demo: https://subratatec1.github.io/intelligent-cio-transformation-workbench/
 
 ## Prototype boundaries and next steps
 
@@ -131,3 +131,15 @@ tests/                Node built-in test suite
 docker-compose.yml    Optional local Neo4j
 .github/workflows/    Automated Node tests
 ```
+
+## Twelve modules and context authoring (v0.2)
+
+Open **All 12 modules** for the original capability map. Each module shows its implementation status, evidence requirements, shared records and missing entity types. Dedicated context workspaces do not imply their analytical engines are implemented.
+
+**Context Builder** creates and edits entities and directed relationships with stable IDs, owners, source references, evidence dates, fact state, classification, confidence and owner-validation assertions. Edits persist in browser localStorage and can be exported as JSON. Existing imported attributes are preserved. No writes are sent to Neo4j from the public application.
+
+**Context readiness** measures required entity-type presence, metadata completeness, validation flags, evidence older than 90 days and isolated entities. These checks are not a completeness or accuracy certification. Access classifications are metadata, not authorization enforcement.
+
+`dist/modules.js` defines the 12 modules and their required types. `dist/context-editor.js` validates authored records. Node tests cover graph integrity, evidence validation and coverage updates. The bootstrap workflow also verifies all twelve module routes, authoring, persistence and mobile layout in Chromium.
+
+For a shared enterprise graph, the next backend work is enterprise SSO, record-level access enforcement, authenticated write APIs, audit history, source connectors and entity reconciliation. The existing optional Neo4j adapter provides local reads and sample seeding only.
