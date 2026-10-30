@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {modules} from '../dist/modules.js';
 export async function verifyModules(page){
+ page.on('pageerror',e=>console.log('Module page error:',e.message));
  await page.setViewportSize({width:1440,height:1100});
  await page.goto('http://127.0.0.1:4173/#modules');
  await page.getByRole('heading',{name:'Twelve modules. One enterprise context.'}).waitFor();
@@ -17,7 +18,7 @@ export async function verifyModules(page){
  await page.getByLabel('Accountable owner',{exact:true}).fill('QA owner');
  await page.getByLabel('Evidence source / reference',{exact:true}).fill('Synthetic QA mapping');
  await page.getByRole('button',{name:'Add record',exact:true}).click();
- await page.getByRole('button',{name:'Save record',exact:true}).waitFor();
+ assert.ok(await page.getByRole('button',{name:'Save record',exact:true}).isVisible(), await page.locator('#context-editor').innerText()+' INVALID '+JSON.stringify(await page.locator('#context-editor').evaluate(f=>[...f.elements].filter(e=>!e.checkValidity()).map(e=>({name:e.name,message:e.validationMessage,value:e.value})))));
  await page.reload();
  await page.locator('#editor-record').selectOption('qa-cloud');
  assert.equal(await page.getByLabel('Entity name',{exact:true}).inputValue(),'QA cloud resource');
@@ -28,7 +29,7 @@ export async function verifyModules(page){
  await page.getByLabel('Accountable owner',{exact:true}).fill('QA owner');
  await page.getByLabel('Evidence source / reference',{exact:true}).fill('Synthetic relationship evidence');
  await page.getByRole('button',{name:'Add record',exact:true}).click();
- await page.getByRole('button',{name:'Save record',exact:true}).waitFor();
+ assert.ok(await page.getByRole('button',{name:'Save record',exact:true}).isVisible(), await page.locator('#context-editor').innerText()+' INVALID '+JSON.stringify(await page.locator('#context-editor').evaluate(f=>[...f.elements].filter(e=>!e.checkValidity()).map(e=>({name:e.name,message:e.validationMessage,value:e.value})))));
  await page.goto('http://127.0.0.1:4173/#module-finops');
  await page.getByRole('button',{name:'QA cloud resource',exact:true}).waitFor();
  await page.goto('http://127.0.0.1:4173/#readiness');

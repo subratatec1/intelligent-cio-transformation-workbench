@@ -74,7 +74,8 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape'){drawer=null
 document.addEventListener('click',event=>{const t=event.target.closest('[data-editor-kind]');if(t){setEditor(t.dataset.editorKind);render();}});
 document.addEventListener('change',event=>{if(event.target.id==='editor-record'){setEditor(getEditor().kind,event.target.value);render();}});
 document.addEventListener('submit',event=>{
- if(event.target.id!=='context-editor')return;
+ // A control named "id" shadows HTMLFormElement.id; use the DOM attribute.
+ if(event.target.getAttribute('id')!=='context-editor')return;
  event.preventDefault();
  try{
   const {kind,id}=getEditor(),form=new FormData(event.target),record=Object.fromEntries(form);
