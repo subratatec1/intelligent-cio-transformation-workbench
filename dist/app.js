@@ -1,4 +1,4 @@
-import {opsState,applicationSummary,evidenceView as operationalView,enterpriseSignals,moduleOperational} from './operational-ui.js?v=0.5';
+import {opsState,applicationSummary,evidenceView as operationalView,enterpriseSignals,moduleOperational} from './operational-ui.js?v=0.5.1';
 import {appRecords,priority as operationalPriority} from './operational.js';
 import {signalsView,signalEvidence} from './signals.js';
 import {decisionModulesView,decisionModuleView,journeyView,chooseDomain,moveJourney,reviewRecord} from './experience-ui.js';
