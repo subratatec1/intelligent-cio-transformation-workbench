@@ -150,3 +150,7 @@ The navigation now uses **CIO Decision Modules** and **Build Enterprise Context*
 New records receive a suggested stable ID. Field guidance explains owners, evidence, validation and fact states. Users can review specific records from the validation step, then return to relevant decision modules. Unsaved form edits prompt before switching steps or navigating through the workbench buttons. JSON import replaces the current snapshot; exports and saved records remain browser-local.
 
 Every module now explains its required information, today's implemented output and an example CIO question. Seven modules link to existing demo analysis; five provide evidence workspaces only. No additional analytical engines or enterprise backend integrations are implied by this usability update.
+
+## Enterprise Signals (v0.4)
+
+Open `#signals` for seven clearly labelled fictional source observations: ServiceNow/CMDB, LeanIX/Alfabet, Jira/Azure DevOps, GitHub/GitLab, Cloud/FinOps, Security/Risk, and Finance/Procurement. Each shows provenance, graph entity links, mapped relationships and a separately labelled decision interpretation. Graph entity panels link back to source signals. These fixed examples do not ingest live data or alter scores. They are mapped only when the Northstar synthetic context and referenced IDs are present; imported enterprise contexts receive no automatic signal matches.
