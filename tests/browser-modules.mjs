@@ -3,23 +3,43 @@ import {modules} from '../dist/modules.js';
 export async function verifyModules(page){
  page.on('pageerror',e=>console.log('Module page error:',e.message));
  await page.setViewportSize({width:1440,height:1100});
+
  await page.goto('http://127.0.0.1:4173/#signals');
  await page.getByRole('heading',{name:'Enterprise Signals',exact:true}).waitFor();
- assert.equal(await page.locator('.signal-source').count(),7);
- for(const id of ['servicenow','leanix','jira','github','cloud','security','finance']){
-  await page.locator('.signal-source[data-signal="'+id+'"]').click();
-  assert.ok(await page.getByRole('heading',{name:'Where this signal belongs'}).isVisible());
-  assert.ok(await page.getByRole('button',{name:'Trace business impact',exact:true}).isVisible());
+ assert.equal(await page.locator('.signal-sources > div').count(),7);
+ assert.equal(await page.locator('nav[aria-label="Main navigation"] button').first().innerText(),'Overview');
+ await page.getByRole('button',{name:'Investigate PolicyCore',exact:true}).click();
+ await page.getByRole('heading',{name:'PolicyCore — application evidence',exact:true}).waitFor();
+ await page.getByRole('heading',{name:'ServiceNow incidents by month and severity'}).waitFor();
+ await page.screenshot({path:'preview/application-evidence.png',fullPage:true});
+ for(const source of ['servicenow','leanix','github','security','finance','jira','cloud']){
+  await page.locator('[data-ops-source="'+source+'"]').click();
+  assert.ok(await page.locator('#source-records details').count()>0);
  }
- await page.locator('.signal-source[data-signal="servicenow"]').click();
+ await page.locator('[data-ops-source="servicenow"]').click();
+ await page.getByLabel('Severity',{exact:true}).selectOption('P1');
+ assert.ok((await page.locator('#source-records tbody tr').allTextContents()).every(x=>x.includes('P1')));
+ await page.getByLabel('Evidence window',{exact:true}).selectOption('1');
+ assert.ok((await page.locator('#source-records tbody tr').allTextContents()).every(x=>x.includes('2026-10-')));
+ await page.getByRole('button',{name:'Open application graph',exact:true}).click();
+ await page.getByRole('button',{name:'Dig into PolicyCore',exact:true}).waitFor();
+ await page.screenshot({path:'preview/enterprise-graph.png',fullPage:true});
+ await page.goto('http://127.0.0.1:4173/#module-applications');
+ const withSignals=await page.locator('.ops-score').allTextContents();
+ await page.getByLabel('Include operational evidence in review priority').uncheck();
+ const withoutSignals=await page.locator('.ops-score').allTextContents();
+ assert.notDeepEqual(withSignals,withoutSignals);
+ await page.getByLabel('Include operational evidence in review priority').check();
+ await page.screenshot({path:'preview/operational-priorities.png',fullPage:true});
+ await page.getByRole('button',{name:'Create evidence review',exact:true}).first().click();
+ assert.ok((await page.url()).endsWith('#decisions'));
+ await page.goto('http://127.0.0.1:4173/#signals');
  await page.screenshot({path:'preview/enterprise-signals.png',fullPage:true});
- await page.getByRole('button',{name:'ClaimsFlow',exact:true}).click();
- await page.getByRole('heading',{name:'Signals & Evidence',exact:true}).waitFor();
- await page.locator('.signal-evidence [data-signal="servicenow"]').click();
- await page.getByRole('heading',{name:'Claims processing interrupted',exact:true}).waitFor();
- await page.getByRole('button',{name:'Trace business impact',exact:true}).click();
- assert.ok((await page.url()).endsWith('#impact'));
+ await page.getByRole('button',{name:'Investigate ClaimsFlow',exact:true}).click();
  await page.setViewportSize({width:390,height:844});
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'application evidence mobile overflow');
+ await page.goto('http://127.0.0.1:4173/#module-applications');
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'operational priorities mobile overflow');
  await page.goto('http://127.0.0.1:4173/#signals');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'signals mobile overflow');
  await page.setViewportSize({width:1440,height:1100});
