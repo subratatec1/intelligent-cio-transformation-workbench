@@ -143,3 +143,10 @@ Open **All 12 modules** for the original capability map. Each module shows its i
 `dist/modules.js` defines the 12 modules and their required types. `dist/context-editor.js` validates authored records. Node tests cover graph integrity, evidence validation and coverage updates. The bootstrap workflow also verifies all twelve module routes, authoring, persistence and mobile layout in Chromium.
 
 For a shared enterprise graph, the next backend work is enterprise SSO, record-level access enforcement, authenticated write APIs, audit history, source connectors and entity reconciliation. The existing optional Neo4j adapter provides local reads and sample seeding only.
+## Guided context building (v0.3)
+
+The navigation now uses **CIO Decision Modules** and **Build Enterprise Context**. The builder guides users through five steps: choose a context domain; add or import records; connect records; validate evidence; explore relevant decisions. Domains are navigation aids over the same shared graph, not separate databases or access boundaries.
+
+New records receive a suggested stable ID. Field guidance explains owners, evidence, validation and fact states. Users can review specific records from the validation step, then return to relevant decision modules. Unsaved form edits prompt before switching steps or navigating through the workbench buttons. JSON import replaces the current snapshot; exports and saved records remain browser-local.
+
+Every module now explains its required information, today's implemented output and an example CIO question. Seven modules link to existing demo analysis; five provide evidence workspaces only. No additional analytical engines or enterprise backend integrations are implied by this usability update.
