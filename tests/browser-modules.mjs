@@ -3,6 +3,26 @@ import {modules} from '../dist/modules.js';
 export async function verifyModules(page){
  page.on('pageerror',e=>console.log('Module page error:',e.message));
  await page.setViewportSize({width:1440,height:1100});
+ await page.goto('http://127.0.0.1:4173/#signals');
+ await page.getByRole('heading',{name:'Enterprise Signals',exact:true}).waitFor();
+ assert.equal(await page.locator('.signal-source').count(),7);
+ for(const id of ['servicenow','leanix','jira','github','cloud','security','finance']){
+  await page.locator('.signal-source[data-signal="'+id+'"]').click();
+  assert.ok(await page.getByRole('heading',{name:'Where this signal belongs'}).isVisible());
+  assert.ok(await page.getByRole('button',{name:'Trace business impact',exact:true}).isVisible());
+ }
+ await page.locator('.signal-source[data-signal="servicenow"]').click();
+ await page.screenshot({path:'preview/enterprise-signals.png',fullPage:true});
+ await page.getByRole('button',{name:'ClaimsFlow',exact:true}).click();
+ await page.getByRole('heading',{name:'Signals & Evidence',exact:true}).waitFor();
+ await page.locator('.signal-evidence [data-signal="servicenow"]').click();
+ await page.getByRole('heading',{name:'Claims processing interrupted',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Trace business impact',exact:true}).click();
+ assert.ok((await page.url()).endsWith('#impact'));
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('http://127.0.0.1:4173/#signals');
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),'signals mobile overflow');
+ await page.setViewportSize({width:1440,height:1100});
  await page.goto('http://127.0.0.1:4173/#modules');
  await page.getByRole('heading',{name:'CIO Decision Modules'}).waitFor();
  assert.equal(await page.locator('.module-card').count(),12);
